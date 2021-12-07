@@ -9,16 +9,14 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
+
   ui->setupUi(this);
-  for (int i = 1; i < 200; i++)
-    ui->listWidget->addItem(
-        new QListWidgetItem(QString::fromStdString(std::to_string(i))));
   QIcon icon_test(
       "/home/remsto/IN204/projet/archive_test/minimax_alphabeta.png");
-  ui->toolButton->setIcon(icon_test);
-  ui->listWidget->addItem(new QListWidgetItem(
-      QIcon("/home/remsto/IN204/projet/archive_test/minimax_alphabeta.png"),
-      QString("test")));
+  for (int i = 1; i < 10; i++)
+    ui->listWidget->addItem(new QListWidgetItem(
+        icon_test, QString::fromStdString(std::to_string(i))));
+  ui->listWidget->addItem(new QListWidgetItem(icon_test, "yahey"));
   QObject::connect(
       ui->listWidget,
       SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),

@@ -4,5 +4,5 @@
 #include <iostream>
 
 void ImageDisplayer::setFromList(QListWidgetItem *item) {
-  setText(item->text());
+  setPixmap((item->icon()).pixmap(500, 500));
 }
