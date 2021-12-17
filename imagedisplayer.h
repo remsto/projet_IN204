@@ -10,6 +10,7 @@ public:
   using QLabel::QLabel;
 public slots:
   void setFromList(QListWidgetItem *item);
+  void zoomIn();
 };
 
 #endif // IMAGEDISPLAYER_H
