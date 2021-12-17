@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "extractor.h"
+#include "imagedisplayer.h"
 
 #include "ui_mainwindow.h"
 
@@ -28,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
       ui->label, SLOT(setFromList(QListWidgetItem *)));
   QObject::connect(ui->actionZoomer, SIGNAL(triggered(bool)), ui->label,
                    SLOT(zoomIn()));
+  QObject::connect(ui->actionDezoomer, SIGNAL(triggered(bool)), ui->label,
+                   SLOT(zoomOut()));
   QObject::connect(ui->actionOpen, SIGNAL(triggered(bool)), this,
                    SLOT(openFile()));
 }
@@ -55,6 +58,11 @@ void MainWindow::openFile() {
 
   int i = 0;
   for (const std::string &filename : files_in_directory) {
+    if (i == 0) {
+      QPixmap first_img(filename.c_str());
+      ui->label->frame_size = first_img.size();
+      ui->label->scale_factor = 1;
+    }
     ui->listWidget->addItem(
         new QListWidgetItem(QIcon(QString(filename.c_str())),
                             QString::fromStdString(std::to_string(i))));

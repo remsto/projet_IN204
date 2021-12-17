@@ -192,6 +192,9 @@
    <property name="text">
     <string>Dezoomer</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
   </action>
  </widget>
  <customwidgets>
