@@ -38,20 +38,31 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile() {
+  namespace fs = std::filesystem; // C++17
+
   // Ouvre un dialogue et récupère le chemin du fichier sélectionné
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), "",
                                                   tr("Image Files (*.cbz)"));
+  std::string extracted_fname =
+      fileName.toStdString().erase(fileName.toStdString().rfind('.'));
+  /*fs::path temp_path = fs::temp_directory_path();
+  temp_path += extracted_fname;
+
+  std::cout << "Current path is " << temp_path << std::endl;*/
+
   // Conversion de la QString en char *, selon la FAQ de QT
   QByteArray ba = fileName.toLocal8Bit();
   const char *fileNameChar = ba.data();
 
+  std::cout << extracted_fname << std::endl;
+  // fs::create_directory(extracted_fname);
+
   // Extraction de l'archive dans le répertoire courant
   extract(fileNameChar);
-  namespace fs = std::filesystem; // C++17
-
+  fs::current_path(extracted_fname);
   // Tri des fichiers par ordre alphabétique
   std::vector<std::filesystem::path> files_in_directory;
-  std::copy(std::filesystem::directory_iterator("iliad_homer"),
+  std::copy(std::filesystem::directory_iterator(extracted_fname),
             std::filesystem::directory_iterator(),
             std::back_inserter(files_in_directory));
   std::sort(files_in_directory.begin(), files_in_directory.end());
@@ -68,9 +79,9 @@ void MainWindow::openFile() {
                             QString::fromStdString(std::to_string(i))));
     i++;
   }
-
-  /*for (const auto &entry : fs::directory_iterator("iliad_homer")) {
-    ui->listWidget->addItem(
-        new QListWidgetItem(QIcon(entry.path().c_str()), "test"));
-  }*/
 }
+
+/*for (const auto &entry : fs::directory_iterator("iliad_homer")) {
+  ui->listWidget->addItem(
+      new QListWidgetItem(QIcon(entry.path().c_str()), "test"));
+}*/
