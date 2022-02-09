@@ -43,8 +43,15 @@ void MainWindow::openFile() {
   // Ouvre un dialogue et récupère le chemin du fichier sélectionné
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), "",
                                                   tr("Image Files (*.cbz)"));
-  std::string extracted_fname =
-      fileName.toStdString().erase(fileName.toStdString().rfind('.'));
+
+  std::cout << fileName.toStdString() << std::endl;
+
+  //std::string extracted_fname = fileName.toStdString().erase(fileName.toStdString().rfind('.'));
+
+  fs::path extracted_fname = fileName.toStdString();
+  extracted_fname = extracted_fname.stem();
+
+
   /*fs::path temp_path = fs::temp_directory_path();
   temp_path += extracted_fname;
 
@@ -59,7 +66,9 @@ void MainWindow::openFile() {
 
   // Extraction de l'archive dans le répertoire courant
   extract(fileNameChar);
-  fs::current_path(extracted_fname);
+
+  //fs::current_path(extracted_fname);
+
   // Tri des fichiers par ordre alphabétique
   std::vector<std::filesystem::path> files_in_directory;
   std::copy(std::filesystem::directory_iterator(extracted_fname),
@@ -80,6 +89,8 @@ void MainWindow::openFile() {
     i++;
   }
 }
+
+std::uintmax_t remove_all( const std::filesystem::path& extracted_fname);
 
 /*for (const auto &entry : fs::directory_iterator("iliad_homer")) {
   ui->listWidget->addItem(
