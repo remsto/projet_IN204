@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -46,6 +47,8 @@ void MainWindow::openFile() {
 
   std::cout << fileName.toStdString() << std::endl;
 
+  if (fileName != NULL){
+
   //std::string extracted_fname = fileName.toStdString().erase(fileName.toStdString().rfind('.'));
 
   fs::path extracted_fname = fileName.toStdString();
@@ -64,8 +67,12 @@ void MainWindow::openFile() {
   std::cout << extracted_fname << std::endl;
   // fs::create_directory(extracted_fname);
 
+
   // Extraction de l'archive dans le répertoire courant
+  auto start_extr = std::chrono::high_resolution_clock::now();
   extract(fileNameChar);
+  auto duration = std::chrono::high_resolution_clock::now() - start_extr;
+  std::cout << "extraction time : " << duration.count() << std::endl;
 
   //fs::current_path(extracted_fname);
 
@@ -88,9 +95,11 @@ void MainWindow::openFile() {
                             QString::fromStdString(std::to_string(i))));
     i++;
   }
-}
 
-std::uintmax_t remove_all( const std::filesystem::path& extracted_fname);
+fs::remove_all(extracted_fname);
+
+ }
+}
 
 /*for (const auto &entry : fs::directory_iterator("iliad_homer")) {
   ui->listWidget->addItem(
