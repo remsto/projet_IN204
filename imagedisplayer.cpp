@@ -5,8 +5,10 @@
 #include <iostream>
 
 void ImageDisplayer::setFromList(QListWidgetItem *item) {
-  QPixmap p = (item->icon()).pixmap(scale_factor * frame_size);
-  setPixmap(p);
+  if (item) {
+    QPixmap p = (item->icon()).pixmap(scale_factor * frame_size);
+    setPixmap(p);
+  }
 }
 
 void ImageDisplayer::zoomIn() {

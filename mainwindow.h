@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <filesystem>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,8 +20,13 @@ public:
 
 public slots:
   void openFile();
+  void closeFile();
+  void loadImage(int index);
 
 private:
   Ui::MainWindow *ui;
+  std::vector<std::filesystem::path> *image_directory;
+  std::vector<bool> *image_loaded;
+  int image_max;
 };
 #endif // MAINWINDOW_H
