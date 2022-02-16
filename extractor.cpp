@@ -66,9 +66,6 @@ int extract(const char *filename) {
       fprintf(stderr, "%s\n", archive_error_string(a));
     if (r < ARCHIVE_WARN)
       return 1;
-    // std::string currentFile = archive_entry_pathname(entry);
-    // std::string fullOutputPath = std::string("/home/hypnos/IN/IN204/Projet/")
-    // + currentFile; archive_entry_set_pathname(entry, fullOutputPath.c_str());
     r = archive_write_header(ext, entry);
     if (r < ARCHIVE_OK)
       fprintf(stderr, "%s\n", archive_error_string(ext));
@@ -98,10 +95,3 @@ void browse(std::string path) {
   for (const auto &entry : fs::directory_iterator(path))
     std::cout << entry.path() << std::endl;
 }
-
-/*int main(int argc, const char **argv)
-{
-    extract(argv[1]);
-    browse(argv[1]);
-    return 0;
-}*/

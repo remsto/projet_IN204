@@ -12,7 +12,7 @@ void ImageDisplayer::setFromList(QListWidgetItem *item) {
 }
 
 void ImageDisplayer::zoomIn() {
-  if (scale_factor < 3.5) {
+  if (scale_factor < 1.5) {
     scale_factor *= 1.25;
     resize(scale_factor * frame_size);
   }

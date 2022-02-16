@@ -9,6 +9,7 @@
 #include <QIcon>
 #include <QLabel>
 #include <QListWidget>
+#include <QMessageBox>
 #include <chrono>
 #include <filesystem>
 #include <iostream>
@@ -18,10 +19,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
 
   ui->setupUi(this);
-
-  // ui->horizontalLayout->setAlignment(ui->listWidget, Qt::AlignLeft);
-  // ui->horizontalLayout->setAlignment(ui->label, Qt::AlignLeft);
-
   ui->horizontalLayout->setStretch(0, 1);
   ui->horizontalLayout->setStretch(1, 99);
 
@@ -29,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
   image_directory = new std::vector<std::filesystem::path>;
   image_directory->push_back(std::filesystem::path());
 
+  // Connection des Signaux et des slots des divers objets
   QObject::connect(
       ui->listWidget,
       SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
@@ -48,8 +46,6 @@ MainWindow::~MainWindow() {
   delete ui;
 }
 
-// void MainWindow::loadImage() {}
-
 void MainWindow::openFile() {
   closeFile();
   namespace fs = std::filesystem; // C++17
@@ -58,56 +54,46 @@ void MainWindow::openFile() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), "",
                                                   tr("Image Files (*.cbz)"));
 
-  std::cout << fileName.toStdString() << std::endl;
-
   if (fileName != NULL) {
+    try {
+      fs::path extracted_fname = fileName.toStdString();
+      extracted_fname = extracted_fname.stem();
 
-    // std::string extracted_fname =
-    // fileName.toStdString().erase(fileName.toStdString().rfind('.'));
+      // Conversion de la QString en char *, selon la FAQ de QT
+      QByteArray ba = fileName.toLocal8Bit();
+      const char *fileNameChar = ba.data();
 
-    fs::path extracted_fname = fileName.toStdString();
-    extracted_fname = extracted_fname.stem();
+      // Extraction de l'archive dans le répertoire courant
+      extract(fileNameChar);
 
-    /*fs::path temp_path = fs::temp_directory_path();
-    temp_path += extracted_fname;
+      // Tri des fichiers par ordre alphabétique
+      image_directory = new std::vector<std::filesystem::path>;
 
-    std::cout << "Current path is " << temp_path << std::endl;*/
+      std::copy(std::filesystem::directory_iterator(extracted_fname),
+                std::filesystem::directory_iterator(),
+                std::back_inserter(*(image_directory)));
+      std::sort(image_directory->begin(), image_directory->end());
+      image_loaded = new std::vector<bool>(image_directory->size(), false);
+    } catch (std::exception) {
+      QMessageBox msgBox;
+      msgBox.setText("Le fichier n'est pas au bon format !");
+      msgBox.exec();
+    }
 
-    // Conversion de la QString en char *, selon la FAQ de QT
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *fileNameChar = ba.data();
-
-    std::cout << extracted_fname << std::endl;
-
-    // Extraction de l'archive dans le répertoire courant
-    auto start_extr = std::chrono::high_resolution_clock::now();
-    extract(fileNameChar);
-    auto duration = std::chrono::high_resolution_clock::now() - start_extr;
-    std::cout << "extraction time : " << duration.count() << std::endl;
-
-    // fs::current_path(extracted_fname);
-
-    // Tri des fichiers par ordre alphabétique
-    image_directory = new std::vector<std::filesystem::path>;
-    std::copy(std::filesystem::directory_iterator(extracted_fname),
-              std::filesystem::directory_iterator(),
-              std::back_inserter(*(image_directory)));
-    std::sort(image_directory->begin(), image_directory->end());
-    image_loaded = new std::vector<bool>(image_directory->size(), false);
+    // Met toutes les images en blanc à l'initialisation
+    QPixmap *white_pixmap;
+    for (int i = 0; i < image_directory->size(); i++) {
+      if (i == 0) {
+        QPixmap first_img(image_directory->at(0).c_str());
+        ui->label->frame_size = first_img.size();
+        ui->label->scale_factor = 1;
+        white_pixmap = new QPixmap(first_img.size());
+        white_pixmap->fill();
+      }
+      ui->listWidget->addItem(new QListWidgetItem(
+          QIcon(*white_pixmap), QString::fromStdString(std::to_string(i))));
+    }
     loadImage(0);
-
-    //    int i = 0;
-    //    for (const std::string &filename : files_in_directory) {
-    //      if (i == 0) {
-    //        QPixmap first_img(filename.c_str());
-    //        ui->label->frame_size = first_img.size();
-    //        ui->label->scale_factor = 1;
-    //      }
-    //      ui->listWidget->addItem(
-    //          new QListWidgetItem(QIcon(QString(filename.c_str())),
-    //                              QString::fromStdString(std::to_string(i))));
-    //      i++;
-    //    }
   }
 }
 
@@ -132,19 +118,12 @@ void MainWindow::loadImage(int index) {
   }
   for (int i = begin; i < end; i++) {
     if (!image_loaded->at(i)) {
-      if (i == 0) {
-        QPixmap first_img(image_directory->at(i).c_str());
-        ui->label->frame_size = first_img.size();
-        ui->label->scale_factor = 1;
-      }
-      ui->listWidget->addItem(
-          new QListWidgetItem(QIcon(QString(image_directory->at(i).c_str())),
-                              QString::fromStdString(std::to_string(i))));
+      ui->listWidget->item(i)->setIcon(
+          QIcon(QString(image_directory->at(i).c_str())));
+      if (i == index)
+        emit ui->listWidget->currentItemChanged(ui->listWidget->item(index),
+                                                nullptr);
       image_loaded->at(i) = true;
     }
   }
 }
-/*for (const auto &entry : fs::directory_iterator("iliad_homer")) {
-  ui->listWidget->addItem(
-      new QListWidgetItem(QIcon(entry.path().c_str()), "test"));
-}*/
